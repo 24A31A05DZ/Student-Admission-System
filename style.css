@@ -1,63 +1,37 @@
 /* Reset */
-body, ul {
-  margin: 0;
-  padding: 0;
-}
+
 body {
   font-family: 'Segoe UI', sans-serif;
   background: #fdfdfd;
   color: #333;
 }
-
-/* Navbar */
-.navbar {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 30px;
-  background: rgba(255, 255, 255, 0.7); /* Light transparent */
-  backdrop-filter: blur(6px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  z-index: 1000;
-}
-.logo {
-  height: 40px;
-  margin-right: 15px;
-}
-
-.navbar a {
-  color: #004080;
-  text-decoration: none;
-  font-weight: 600;
-}
-.navbar a:hover {
-  color: #0066cc;
-}
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 30px;           /* space between menu and button */
-}
-
-.navbar ul {
-  display: flex;
-  gap: 15px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-
-@media (max-width: 768px) {
-  .nav-right {
-    gap: 20px;
+/* Navbar*/
+.navbar-brand {
+    font-family: 'Fredoka', sans-serif;       /* Rounded, bubbly feel */
+    font-weight: 700;                         /* Extra bold */
+    font-size: 2rem;                          /* Adjust size as needed */
+    color: #4a00e0;                           /* Vibrant purple/blue for modern look */
+    letter-spacing: 1px;
+    text-transform: uppercase;                /* Optional – makes it punchier */
+    
+    /* Bubble/pop effect with layered shadows */
+    text-shadow: 3px 3px 0 #ca2691;
+    /* Multi-color 3D pop – change colors to match your theme (additional offsets can be added) */
+    /* Slant / tilt effect (bubble slant words) */
+    transform: skewX(-12deg);                 /* Negative = right-leaning slant */
+    display: inline-block;                    /* Important for transform */
+    
+    transition: all 0.3s ease;                /* Smooth hover */
   }
-  
-}
-/* Hero Section */
+
+  .navbar-brand:hover {
+    transform: skewX(-12deg) scale(1.08);     /* Slight grow on hover */
+    text-shadow: 
+      4px 4px 0 #200d6b, 
+      8px 8px 0 #4b1d7f, 
+      12px 12px 0 #5148b2;
+  }
+
 /* Hero Section */
 .hero {
   position: relative;
@@ -91,7 +65,7 @@ body {
 }
 
 .project-title {
-  font-size: 3.8rem;
+  font-size: 3.8rem !important;
   font-weight: bold;
   margin-bottom: 1.2rem;
   text-shadow: 0 3px 10px rgba(0,0,0,0.7);  /* Helps text pop even more */
@@ -117,29 +91,167 @@ body {
 }
 
 /* Flowchart Section */
-.flowchart {
-  padding: 60px 20px;
+/* FLOW SECTION */
+
+.flow-container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:40px;
+    margin-top:40px;
+}
+
+/* FLOW STEP */
+
+.flow-step{
+    display:flex;
+    align-items:center;
+}
+
+/* CARD DESIGN */
+
+.flow-step .card{
+    width:220px;
+    padding:25px 20px;
+    border-radius:12px;
+    text-align:center;
+    background:white;
+    transition:0.3s;
+    
+    /* Professional shadow */
+    box-shadow:0 6px 20px rgba(0,0,0,0.12);
+}
+
+/* Hover effect */
+
+.flow-step .card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* STEP NUMBER */
+
+.step-number{
+    width:40px;
+    height:40px;
+    margin:auto;
+    margin-bottom:15px;
+    
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:50%;
+    background:#0d6efd;
+    color:white;
+    font-weight:bold;
+}
+
+/* ARROW */
+
+.step-arrow{
+    font-size:28px;
+    margin-left:15px;
+    color:#0d6efd;
+}
+
+/* TEXT */
+
+.flow-step h5{
+    font-size:18px;
+    margin-bottom:8px;
+}
+
+.flow-step p{
+    font-size:14px;
+    color:#666;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:768px){
+
+    .flow-container{
+        flex-direction:column;
+    }
+
+    .flow-step{
+        flex-direction:column;
+    }
+
+    .step-arrow{
+        transform:rotate(90deg);
+        margin:15px 0;
+    }
+}
+
+/* Navbar customization */
+.navbar-custom { background-color: #00274d !important; }
+.navbar-custom .navbar-brand, .navbar-custom .nav-link { color: white !important; }
+.navbar-custom .nav-link { position: relative; }
+.navbar-custom .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 0; background: #fff; transition: width 0.3s; }
+.navbar-custom .nav-link:hover::after { width: 100%; }
+.navbar-custom .nav-link.active::after { width: 100%; }
+
+/* button styles */
+.btn-primary { background-color: #0056b3 !important; border: none; }
+
+/* Card lift effect used on school cards */
+.hover-lift {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.hover-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+}
+
+/* Login modal and card styling */
+#loginModal .modal-content {
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+#loginModal .modal-header {
+  background: #0277bd;
+  color: #fff;
+  border-bottom: none;
+}
+#loginModal .modal-body {
+  padding: 2rem;
+}
+#loginModal .tab {
+  cursor: pointer;
+  padding: 12px 0;
+  flex: 1;
   text-align: center;
+  font-weight: 500;
+  transition: background 0.3s, color 0.3s;
 }
-.flow-steps {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 30px;
+#loginModal .tab.active { background: #e3f2fd; color: #0277bd; }
+
+/* navbar login button spacing */
+#loginBtn {
+  margin-left: 1rem;
 }
-.card {
-  background: #ffffff;
-  border-radius: 6px;
-  padding: 15px;
-  width: 180px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  font-weight: 600;
-  transition: transform 0.2s, background 0.2s;
-}
-.card:hover {
-  transform: translateY(-5px);
-  background: #f0f8ff;
+
+.btn-primary:hover, .btn-primary:focus { background-color: #003d80 !important; }
+
+/* Flowchart arrows */
+.flowchart { align-items: center; }
+
+/* card lift on hover */
+.hover-lift { transition: transform 0.2s, box-shadow 0.2s; }
+.hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+
+/* form elements */
+input, select, textarea, .form-control { border-radius: 0.4rem; }
+button { border-radius: 0.4rem; }
+.flow-step { position: relative; display: flex; align-items: center; justify-content: center; }
+.step-arrow { font-size: 2rem; color: #666; margin: 0 10px; }
+.flow-step:last-child .step-arrow { display: none; }
+@media (max-width: 768px) {
+  .step-arrow { display: none; }
 }
 
 /* Footer */
