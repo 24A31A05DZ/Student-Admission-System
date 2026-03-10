@@ -83,16 +83,35 @@ function updateApplicationStatus(id, updates) {
 
 // ---------- homepage schools ----------
 const TOP_SCHOOLS = [
-  {id:1,name:'Aditya School', address:'Aditya Srinagar, Kakinada', board:'SSC', estab:'1984', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Established reputation','Good facilities']},
-  {id:2,name:'Sri Chaitanya', address:'Santhi Nagar, Kakinada', board:'SSC', estab:'1986', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Strong academics','Comfortable campus']},
-  {id:3,name:'Narayana', address:'Santhi Nagar, Kakinada', board:'CBSE', estab:'1979', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Competitive environment','High results']},
-  {id:4,name:'Lakshya', address:'ABD Road, Achampeta', board:'CBSE', estab:'2016', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Modern infrastructure','Focused coaching']},
-  {id:5,name:'Delhi Public School', address:'Panasapadu, Kakinada', board:'CBSE', estab:'1949', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Historic institution','Wide alumni network']},
-  {id:6,name:'Bhashyam', address:'Santhi Nagar, Kakinada', board:'SSC', estab:'1993', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Holistic education','Large campus']},
-  {id:7,name:'Ashram Public School', address:'Nagamalli Thota Junction', board:'CBSE', estab:'1987', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Tradition meets technology','Good discipline']},
-  {id:8,name:'Sri Prakash', address:'Near DMart, Kakinada', board:'CBSE', estab:'1977', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Experienced faculty','Spacious classrooms']},
-  {id:9,name:'Sri Agastya', address:'Postal Colony, Kakinada', board:'CBSE', estab:'1989', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Strong sports program','Caring staff']},
-  {id:10,name:'Dr KKR Gowtham', address:'Venkat Nagar, Kakinada', board:'SSC', estab:'2005', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Tech-forward curriculum','Friendly environment']}
+  {id:1,name:'Aditya School', address:'Aditya Srinagar, Kakinada', board:'SSC', estab:'1984', founder:'R. Aditya', grades:'1-12', bus:true, hostel:true, features:'Bus and Hostel', reviews:['Established reputation','Good facilities'],
+      description:'A well-established institution with a focus on holistic development.',
+      facilities:['Smart classrooms','Computer labs','Science labs','Library','Playground','Bus transport','Hostel facility'],
+      subjects:['Math','Science','English','Social Studies'],
+      methodology:'Interactive and activity-based learning with periodic assessments.',
+      performance:'Consistently above district average.',
+      achievements:['Best School Award 2019'],
+      phone:'0891-1234567', email:'info@adityaschool.edu', admission:'Open', rating:4.2, googleMaps:'https://maps.google.com?q=Aditya+School+Kakinada',
+      images:['assets/school-1.jpg','assets/school-1b.jpg']
+  },
+  {id:2,name:'Sri Chaitanya', address:'Santhi Nagar, Kakinada', board:'SSC', estab:'1986', founder:'Smt. Chaitanya Devi', grades:'1-12', bus:true, hostel:true, features:'Bus and Hostel', reviews:['Strong academics','Comfortable campus'],
+      description:'Renowned for academic excellence and student support.',
+      facilities:['Smart classrooms','Computer labs','Library','Playground','Bus transport','Hostel facility'],
+      subjects:['Math','Science','English','Telugu'],
+      methodology:'Blended learning with focus on critical thinking.',
+      performance:'High pass percentage in board exams.',
+      achievements:['State level Olympiad winners','Sports champions'],
+      phone:'0891-7654321', email:'contact@srichaitanya.edu', admission:'Open', rating:4.5, googleMaps:'https://maps.google.com?q=Sri+Chaitanya+School+Kakinada',
+      images:['https://content3.jdmagicbox.com/v2/comp/kakinada/a5/9999px884.x884.170604235618.l2a5/catalogue/sri-chaitanya-school-ramanayyapeta-kakinada-hlhotnz25h.jpg','assets/school-2b.jpg']
+  },
+  {id:3,name:'Narayana', address:'Santhi Nagar, Kakinada', board:'CBSE', estab:'1979', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Competitive environment','High results'], images:['assets/school-3.jpg','assets/school-3b.jpg','assets/school-3c.jpg']},
+
+  {id:4,name:'Lakshya', address:'ABD Road, Achampeta', board:'CBSE', estab:'2016', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Modern infrastructure','Focused coaching'], images:['assets/school-4.jpg']},
+  {id:5,name:'Delhi Public School', address:'Panasapadu, Kakinada', board:'CBSE', estab:'1949', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Historic institution','Wide alumni network'], images:['assets/school-5.jpg']},
+  {id:6,name:'Bhashyam', address:'Santhi Nagar, Kakinada', board:'SSC', estab:'1993', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Holistic education','Large campus'], images:['assets/school-6.jpg']},
+  {id:7,name:'Ashram Public School', address:'Nagamalli Thota Junction', board:'CBSE', estab:'1987', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Tradition meets technology','Good discipline'], images:['assets/school-7.jpg']},
+  {id:8,name:'Sri Prakash', address:'Near DMart, Kakinada', board:'CBSE', estab:'1977', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Experienced faculty','Spacious classrooms'], images:['assets/school-8.jpg']},
+  {id:9,name:'Sri Agastya', address:'Postal Colony, Kakinada', board:'CBSE', estab:'1989', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Strong sports program','Caring staff'], images:['assets/school-9.jpg']},
+  {id:10,name:'Dr KKR Gowtham', address:'Venkat Nagar, Kakinada', board:'SSC', estab:'2005', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Tech-forward curriculum','Friendly environment'], images:['assets/school-10.jpg']}
 ];
 
 function renderHomeSchools() {
@@ -102,9 +121,10 @@ function renderHomeSchools() {
   TOP_SCHOOLS.forEach(s => {
     const col = document.createElement('div');
     col.className = 'col-lg-3 col-md-4 col-sm-6 mb-4';
+    const thumb = s.image || `assets/school-${s.id}.jpg`;
     col.innerHTML = `
       <div class="card h-100 shadow-sm hover-lift">
-        <img src="assets/school-${s.id}.jpg" class="card-img-top" alt="${s.name}">
+        <img src="${thumb}" class="card-img-top" alt="${s.name}">
         <div class="card-body">
           <h5 class="card-title">${s.name}</h5>
           <p class="card-text small text-muted">${s.board} | ${s.address}</p>
@@ -132,28 +152,110 @@ function loadSchoolDetails() {
   if (!s.name) {
     container.innerHTML = '<p class="text-danger">No school selected. Please return to homepage.</p>';
     return;
+
+    const carousel = document.getElementById("carousel");
+
+  if (carousel && s.images) {
+    s.images.forEach(img => {
+
+      const image = document.createElement("img");
+
+      image.src = resolveImagePath(img);
+      image.classList.add("carousel-img");
+
+      carousel.appendChild(image);
+
+    });
   }
-  container.innerHTML = `
-    <div class="row mb-4">
-      <div class="col-md-4">
-        <div class="card">
-          <img src="assets/school-${s.id}.jpg" class="card-img-top" alt="${s.name}">
-        </div>
+  }
+
+  // helper to convert a relative asset path into one that works from the details page
+  function resolveImagePath(img) {
+    if (!img) return img;
+    // absolute URL or root-relative stays untouched
+    if (/^(https?:)?\/\//.test(img) || img.startsWith('/')) return img;
+    // otherwise page is in /pages/, so prefix ../
+    return '../' + img;
+  }
+
+  const slides = (s.images || []).map((img, idx) => `
+      <div class="carousel-item ${idx===0? 'active' : ''}">
+        <img src="${resolveImagePath(img)}" class="d-block w-100" alt="${s.name} image ${idx+1}">
       </div>
-      <div class="col-md-8">
-        <div class="card p-4">
-          <h3>${s.name}</h3>
-          <p><strong>Address:</strong> ${s.address}</p>
-          <p><strong>Contact:</strong> ${s.contact} | ${s.phone}</p>
-          <p><strong>Email:</strong> ${s.email}</p>
-          <p><strong>Website:</strong> <a href="${s.website}" target="_blank">${s.website}</a></p>
+  `).join('');
+
+  const listToHtml = arr => (arr||[]).map(i=>`<li>${i}</li>`).join('');
+  const starRating = r => r ? `<p class="text-warning">${'★'.repeat(Math.round(r))}${'☆'.repeat(5-Math.round(r))}</p>` : '';
+
+  container.innerHTML = `
+    <div id="schoolCarousel" class="carousel slide mb-4" data-ride="carousel">
+      <div class="carousel-inner">
+        ${slides}
+      </div>
+      <a class="carousel-control-prev" href="#schoolCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+      </a>
+      <a class="carousel-control-next" href="#schoolCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+      </a>
+    </div>
+
+    <div class="text-center mb-5">
+      <h2>${s.name}</h2>
+      <p class="text-muted"><i class="fas fa-map-marker-alt"></i> ${s.address}</p>
+      ${starRating(s.rating)}
+    </div>
+
+    <div class="row">
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card p-3">
+          <h5><i class="fas fa-info-circle"></i> Basic Information</h5>
+          <p><strong>Founded:</strong> ${s.estab} by ${s.founder||'N/A'}</p>
           <p><strong>Board:</strong> ${s.board}</p>
           <p><strong>Grades:</strong> ${s.grades}</p>
-          <p><strong>Established:</strong> ${s.estab}</p>
-          <p><strong>Features:</strong> ${s.features}</p>
-          <p><strong>Bus Facilities:</strong> ${s.bus ? 'Available' : 'Not Available'}</p>
-          <p><strong>Hostel Facilities:</strong> ${s.hostel ? 'Available' : 'Not Available'}</p>
-          ${s.reviews && s.reviews.length ? `<div><strong>Student Reviews:</strong><ul>${s.reviews.map(r=>`<li>${r}</li>`).join('')}</ul></div>` : ''}
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card p-3">
+          <h5><i class="fas fa-school"></i> About</h5>
+          <p>${s.description||'No description available.'}</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card p-3">
+          <h5><i class="fas fa-cog"></i> Facilities</h5>
+          <ul>${listToHtml(s.facilities)}</ul>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card p-3">
+          <h5><i class="fas fa-book-open"></i> Academics</h5>
+          <p><strong>Subjects:</strong> ${(s.subjects||[]).join(', ')}</p>
+          <p><strong>Method:</strong> ${s.methodology||'-'}</p>
+          <p><strong>Performance:</strong> ${s.performance||'-'}</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card p-3">
+          <h5><i class="fas fa-trophy"></i> Achievements</h5>
+          <ul>${listToHtml(s.achievements)}</ul>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card p-3">
+          <h5><i class="fas fa-address-book"></i> Contact Info</h5>
+          <p><i class="fas fa-phone"></i> ${s.phone||'-'}</p>
+          <p><i class="fas fa-envelope"></i> ${s.email||'-'}</p>
+          <p><i class="fas fa-map-marker-alt"></i> ${s.address||'-'}</p>
+          ${s.googleMaps?`<a href="${s.googleMaps}" target="_blank" class="btn btn-sm btn-outline-primary">View on Map</a>`:''}
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card p-3">
+          <h5><i class="fas fa-user-graduate"></i> Admission</h5>
+          <p>Status: <strong>${s.admission||'Closed'}</strong></p>
           <a href="admission.html" class="btn btn-success" onclick="selectSchool(${s.id})">Apply Now</a>
         </div>
       </div>
