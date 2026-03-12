@@ -91,7 +91,7 @@ const TOP_SCHOOLS = [
       performance:'Consistently above district average.',
       achievements:['Best School Award 2019'],
       phone:'0891-1234567', email:'info@adityaschool.edu', admission:'Open', rating:4.2, googleMaps:'https://maps.google.com?q=Aditya+School+Kakinada',
-      images:['assets/school-1.jpg','assets/school-1b.jpg']
+      images:['assets/school-1.jpg','assets/school-1a.jpg','assets/school-1b.jpg']
   },
   {id:2,name:'Sri Chaitanya', address:'Santhi Nagar, Kakinada', board:'SSC', estab:'1986', founder:'Smt. Chaitanya Devi', grades:'1-12', bus:true, hostel:true, features:'Bus and Hostel', reviews:['Strong academics','Comfortable campus'],
       description:'Renowned for academic excellence and student support.',
@@ -101,17 +101,17 @@ const TOP_SCHOOLS = [
       performance:'High pass percentage in board exams.',
       achievements:['State level Olympiad winners','Sports champions'],
       phone:'0891-7654321', email:'contact@srichaitanya.edu', admission:'Open', rating:4.5, googleMaps:'https://maps.google.com?q=Sri+Chaitanya+School+Kakinada',
-      images:['https://content3.jdmagicbox.com/v2/comp/kakinada/a5/9999px884.x884.170604235618.l2a5/catalogue/sri-chaitanya-school-ramanayyapeta-kakinada-hlhotnz25h.jpg','assets/school-2b.jpg']
+      images:['assets/school-2.jpg','assets/school-2a.jpg','assets/school-2b.jpg']
   },
   {id:3,name:'Narayana', address:'Santhi Nagar, Kakinada', board:'CBSE', estab:'1979', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Competitive environment','High results'], images:['assets/school-3.jpg','assets/school-3b.jpg','assets/school-3c.jpg']},
 
-  {id:4,name:'Lakshya', address:'ABD Road, Achampeta', board:'CBSE', estab:'2016', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Modern infrastructure','Focused coaching'], images:['assets/school-4.jpg']},
-  {id:5,name:'Delhi Public School', address:'Panasapadu, Kakinada', board:'CBSE', estab:'1949', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Historic institution','Wide alumni network'], images:['assets/school-5.jpg']},
-  {id:6,name:'Bhashyam', address:'Santhi Nagar, Kakinada', board:'SSC', estab:'1993', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Holistic education','Large campus'], images:['assets/school-6.jpg']},
-  {id:7,name:'Ashram Public School', address:'Nagamalli Thota Junction', board:'CBSE', estab:'1987', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Tradition meets technology','Good discipline'], images:['assets/school-7.jpg']},
-  {id:8,name:'Sri Prakash', address:'Near DMart, Kakinada', board:'CBSE', estab:'1977', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Experienced faculty','Spacious classrooms'], images:['assets/school-8.jpg']},
-  {id:9,name:'Sri Agastya', address:'Postal Colony, Kakinada', board:'CBSE', estab:'1989', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Strong sports program','Caring staff'], images:['assets/school-9.jpg']},
-  {id:10,name:'Dr KKR Gowtham', address:'Venkat Nagar, Kakinada', board:'SSC', estab:'2005', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Tech-forward curriculum','Friendly environment'], images:['assets/school-10.jpg']}
+  {id:4,name:'Lakshya', address:'ABD Road, Achampeta', board:'CBSE', estab:'2016', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Modern infrastructure','Focused coaching'], images:['assets/school-4.jpg','assets/school-4a.jpg','assets/school-4b.jpg']},
+  {id:5,name:'Delhi Public School', address:'Panasapadu, Kakinada', board:'CBSE', estab:'1949', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Historic institution','Wide alumni network'], images:['assets/school-5.jpg','assets/school-5a.jpg','assets/school-5b.jpg']},
+  {id:6,name:'Bhashyam', address:'Santhi Nagar, Kakinada', board:'SSC', estab:'1993', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Holistic education','Large campus'], images:['assets/school-6.jpg','assets/school-6a.jpg','assets/school-6b.jpg']},
+  {id:7,name:'Ashram Public School', address:'Nagamalli Thota Junction', board:'CBSE', estab:'1987', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Tradition meets technology','Good discipline'], images:['assets/school-7.jpg','assets/school-7a.jpg','assets/school-7b.jpg']},
+  {id:8,name:'Sri Prakash', address:'Near DMart, Kakinada', board:'CBSE', estab:'1977', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Experienced faculty','Spacious classrooms'], images:['assets/school-8.jpg','assets/school-8a.jpg','assets/school-8b.jpg']},
+  {id:9,name:'Sri Agastya', address:'Postal Colony, Kakinada', board:'CBSE', estab:'1989', bus:true, hostel:true, features:'Bus and Hostel', grades:'1-12', reviews:['Strong sports program','Caring staff'], images:['assets/school-9.jpg','assets/school-9a.jpg','assets/school-9b.jpg']},
+  {id:10,name:'Dr KKR Gowtham', address:'Venkat Nagar, Kakinada', board:'SSC', estab:'2005', bus:true, hostel:false, features:'Bus', grades:'1-12', reviews:['Tech-forward curriculum','Friendly environment'], images:['assets/school-10.jpg','assets/school-10a.jpg','assets/school-10b.jpg']}
 ];
 
 function renderHomeSchools() {
@@ -124,7 +124,7 @@ function renderHomeSchools() {
     const thumb = s.image || `assets/school-${s.id}.jpg`;
     col.innerHTML = `
       <div class="card h-100 shadow-sm hover-lift">
-        <img src="${thumb}" class="card-img-top" alt="${s.name}">
+        <img src="${thumb}" class="card-img-top school-card-img" alt="${s.name}">
         <div class="card-body">
           <h5 class="card-title">${s.name}</h5>
           <p class="card-text small text-muted">${s.board} | ${s.address}</p>
@@ -152,21 +152,6 @@ function loadSchoolDetails() {
   if (!s.name) {
     container.innerHTML = '<p class="text-danger">No school selected. Please return to homepage.</p>';
     return;
-
-    const carousel = document.getElementById("carousel");
-
-  if (carousel && s.images) {
-    s.images.forEach(img => {
-
-      const image = document.createElement("img");
-
-      image.src = resolveImagePath(img);
-      image.classList.add("carousel-img");
-
-      carousel.appendChild(image);
-
-    });
-  }
   }
 
   // helper to convert a relative asset path into one that works from the details page
@@ -178,9 +163,16 @@ function loadSchoolDetails() {
     return '../' + img;
   }
 
-  const slides = (s.images || []).map((img, idx) => `
+  // prepare image array and ensure exactly three slides
+  let imgs = (s.images || []).slice();
+  if (imgs.length < 3) {
+    const filler = imgs[imgs.length - 1] || 'assets/placeholder.jpg';
+    while (imgs.length < 3) imgs.push(filler);
+  }
+
+  const slides = imgs.map((img, idx) => `
       <div class="carousel-item ${idx===0? 'active' : ''}">
-        <img src="${resolveImagePath(img)}" class="d-block w-100" alt="${s.name} image ${idx+1}">
+        <img src="${resolveImagePath(img)}" class="d-block carousel-img" alt="${s.name} image ${idx+1}">
       </div>
   `).join('');
 
@@ -188,77 +180,84 @@ function loadSchoolDetails() {
   const starRating = r => r ? `<p class="text-warning">${'★'.repeat(Math.round(r))}${'☆'.repeat(5-Math.round(r))}</p>` : '';
 
   container.innerHTML = `
-    <div id="schoolCarousel" class="carousel slide mb-4" data-ride="carousel">
-      <div class="carousel-inner">
-        ${slides}
+    <div class="school-carousel-wrapper">
+      <div id="schoolCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          ${slides}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#schoolCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#schoolCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
       </div>
-      <a class="carousel-control-prev" href="#schoolCarousel" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-      </a>
-      <a class="carousel-control-next" href="#schoolCarousel" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-      </a>
     </div>
 
-    <div class="text-center mb-5">
-      <h2>${s.name}</h2>
-      <p class="text-muted"><i class="fas fa-map-marker-alt"></i> ${s.address}</p>
-      ${starRating(s.rating)}
-    </div>
+    <div class="container mt-5">
+      <div class="school-header text-center mb-5">
+        <h1>${s.name}</h1>
+        <div class="school-meta">
+          <p class="text-muted"><i class="fas fa-map-marker-alt"></i> ${s.address}</p>
+          ${starRating(s.rating)}
+        </div>
+      </div>
 
-    <div class="row">
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card p-3">
-          <h5><i class="fas fa-info-circle"></i> Basic Information</h5>
-          <p><strong>Founded:</strong> ${s.estab} by ${s.founder||'N/A'}</p>
-          <p><strong>Board:</strong> ${s.board}</p>
-          <p><strong>Grades:</strong> ${s.grades}</p>
+      <section class="about-section mb-5">
+        <h2 class="section-title">About ${s.name}</h2>
+        <p class="about-description">${s.description||'No description available.'}</p>
+      </section>
+
+      <section class="school-info-section mb-5">
+        <div class="info-grid">
+          <div class="info-card">
+            <h5><i class="fas fa-info-circle"></i> Basic Information</h5>
+            <div class="info-content">
+              <p><strong>Founded:</strong> ${s.estab}</p>
+              <p><strong>Founder:</strong> ${s.founder||'N/A'}</p>
+              <p><strong>Board:</strong> ${s.board}</p>
+              <p><strong>Grades:</strong> ${s.grades}</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <h5><i class="fas fa-phone"></i> Contact Information</h5>
+            <div class="info-content">
+              <p><strong>Phone:</strong> ${s.phone||'-'}</p>
+              <p><strong>Email:</strong> ${s.email||'-'}</p>
+              <p><strong>Address:</strong> ${s.address||'-'}</p>
+              ${s.googleMaps?`<a href="${s.googleMaps}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">View on Map</a>`:''}\n            </div>
+          </div>
+          <div class="info-card">
+            <h5><i class="fas fa-cog"></i> Facilities</h5>
+            <div class="info-content">
+              <ul class="facilities-list">${listToHtml(s.facilities)}</ul>
+            </div>
+          </div>
+          <div class="info-card">
+            <h5><i class="fas fa-book-open"></i> Academics</h5>
+            <div class="info-content">
+              <p><strong>Subjects:</strong> ${(s.subjects||[]).join(', ')}</p>
+              <p><strong>Teaching Method:</strong> ${s.methodology||'-'}</p>
+              <p><strong>Performance:</strong> ${s.performance||'-'}</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <h5><i class="fas fa-trophy"></i> Achievements</h5>
+            <div class="info-content">
+              <ul class="achievements-list">${listToHtml(s.achievements)}</ul>
+            </div>
+          </div>
+          <div class="info-card admission-card">
+            <h5><i class="fas fa-user-graduate"></i> Admission</h5>
+            <div class="info-content">
+              <p class="admission-status"><strong>Status:</strong> <span class="badge ${s.admission === 'Open' ? 'bg-success' : 'bg-danger'}">${s.admission||'Closed'}</span></p>
+              <a href="admission.html" class="btn btn-success mt-3" onclick="selectSchool(${s.id})">Apply Now</a>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card p-3">
-          <h5><i class="fas fa-school"></i> About</h5>
-          <p>${s.description||'No description available.'}</p>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card p-3">
-          <h5><i class="fas fa-cog"></i> Facilities</h5>
-          <ul>${listToHtml(s.facilities)}</ul>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card p-3">
-          <h5><i class="fas fa-book-open"></i> Academics</h5>
-          <p><strong>Subjects:</strong> ${(s.subjects||[]).join(', ')}</p>
-          <p><strong>Method:</strong> ${s.methodology||'-'}</p>
-          <p><strong>Performance:</strong> ${s.performance||'-'}</p>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card p-3">
-          <h5><i class="fas fa-trophy"></i> Achievements</h5>
-          <ul>${listToHtml(s.achievements)}</ul>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card p-3">
-          <h5><i class="fas fa-address-book"></i> Contact Info</h5>
-          <p><i class="fas fa-phone"></i> ${s.phone||'-'}</p>
-          <p><i class="fas fa-envelope"></i> ${s.email||'-'}</p>
-          <p><i class="fas fa-map-marker-alt"></i> ${s.address||'-'}</p>
-          ${s.googleMaps?`<a href="${s.googleMaps}" target="_blank" class="btn btn-sm btn-outline-primary">View on Map</a>`:''}
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card p-3">
-          <h5><i class="fas fa-user-graduate"></i> Admission</h5>
-          <p>Status: <strong>${s.admission||'Closed'}</strong></p>
-          <a href="admission.html" class="btn btn-success" onclick="selectSchool(${s.id})">Apply Now</a>
-        </div>
-      </div>
+      </section>
     </div>
   `;
 }
@@ -704,16 +703,18 @@ function updateNavForRole() {
 
 // logout helpers
 function logout() {
+  // clear any stored login data
   localStorage.removeItem('currentStudent');
   localStorage.removeItem('role');
   updateNavForRole();
-  window.location.href = 'index.html';
+  // send user to login page explicitly
+  window.location.href = 'login.html';
 }
 function logoutSchool() {
   localStorage.removeItem('currentSchool');
   localStorage.removeItem('role');
   updateNavForRole();
-  window.location.href = 'index.html';
+  window.location.href = 'login.html';
 }
 
 // initialize modal and navbar when DOM ready
@@ -733,4 +734,16 @@ document.addEventListener('DOMContentLoaded', () => {
       heroBtn.onclick = e => { e.preventDefault(); $('#loginModal').modal('show'); };
     }
   }
+
+  // generic logout helper for any element with .logout-btn
+  document.body.addEventListener('click', function(e) {
+    if (e.target.matches('.logout-btn')) {
+      e.preventDefault();
+      // clear storage and redirect
+      localStorage.removeItem('currentStudent');
+      localStorage.removeItem('currentSchool');
+      localStorage.removeItem('role');
+      window.location.href = 'login.html';
+    }
+  });
 });
