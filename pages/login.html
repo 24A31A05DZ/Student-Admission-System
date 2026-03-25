@@ -156,7 +156,7 @@
         <ul class="navbar-nav">
           <li class="nav-item"><a class="nav-link" href="../index.html">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="../schools.html">Schools</a></li>
-          <li class="nav-item"><a class="nav-link" href="../admission.html">Admission</a></li>
+          <li class="nav-item"><a class="nav-link" href="admission.html">Admission</a></li>
           <li class="nav-item"><a class="nav-link" id="dashboardLink" href="#">Dashboard</a></li>
         </ul>
       </div>
@@ -287,13 +287,30 @@
     });
 
     // Handle student login
-    document.getElementById('student-login').addEventListener('submit', e => {
+    document.getElementById('student-login').addEventListener('submit', async e => {
       e.preventDefault();
       const email = document.getElementById('student-email').value.trim();
       const pwd = document.getElementById('student-password').value;
-      const user = loginStudent(email, pwd);
+      let user = null;
+      try {
+        if (email.includes('@')) {
+          user = await loginStudentFirebase(email, pwd);
+        }
+      } catch (err) {
+        console.warn('Firebase student login failed, trying local login.', err);
+      }
+      if (!user) user = loginStudent(email, pwd);
       if (user) {
-        setCurrentStudent(email);
+        if (user.uid && user.email) {
+          upsertStudentProfile({
+            uid: user.uid,
+            name: user.displayName || email.split('@')[0],
+            email: user.email,
+            mobile: '',
+            password: ''
+          });
+        }
+        setCurrentStudent(user.email || email);
         localStorage.removeItem('currentSchool');
         localStorage.setItem('role','student');
         window.location.href = 'student-dashbord.html';
@@ -303,7 +320,7 @@
     });
 
     // Handle student signup
-    document.getElementById('student-signup').addEventListener('submit', e => {
+    document.getElementById('student-signup').addEventListener('submit', async e => {
       e.preventDefault();
       const student = {
         name: document.getElementById('s-name').value.trim(),
@@ -311,6 +328,21 @@
         mobile: document.getElementById('s-mobile').value.trim(),
         password: document.getElementById('s-password').value
       };
+      try {
+        const firebaseUser = await registerStudentFirebase(student);
+        if (firebaseUser) {
+          upsertStudentProfile({ ...student, uid: firebaseUser.uid });
+          alert('✔️ Student account created successfully! You can now login.');
+          document.getElementById('student-toggle').click();
+          return;
+        }
+      } catch (err) {
+        if (err && err.code === 'auth/email-already-in-use') {
+          alert('⚠️ That email is already registered. Please login.');
+          return;
+        }
+        console.warn('Firebase student signup failed, trying local signup.', err);
+      }
       if (registerStudent(student)) {
         alert('✔️ Student account created successfully! You can now login.');
         document.getElementById('student-toggle').click();
@@ -320,13 +352,22 @@
     });
 
     // Handle school login
-    document.getElementById('school-login').addEventListener('submit', e => {
+    document.getElementById('school-login').addEventListener('submit', async e => {
       e.preventDefault();
       const udise = document.getElementById('school-udise').value.trim();
       const pwd = document.getElementById('school-password').value;
-      const sch = loginSchool(udise, pwd);
+      let sch = null;
+      try {
+        const firebaseUser = await loginSchoolFirebase(udise, pwd);
+        if (firebaseUser) {
+          sch = getSchools().find(s => s.uid === firebaseUser.uid || s.email === firebaseUser.email) || null;
+        }
+      } catch (err) {
+        console.warn('Firebase school login failed, trying local login.', err);
+      }
+      if (!sch) sch = loginSchool(udise, pwd);
       if (sch) {
-        setCurrentSchool(udise);
+        setCurrentSchool(sch.udise || udise);
         localStorage.removeItem('currentStudent');
         localStorage.setItem('role','school');
         window.location.href = 'school-dashboard.html';
@@ -336,7 +377,7 @@
     });
 
     // Handle school signup
-    document.getElementById('school-signup').addEventListener('submit', e => {
+    document.getElementById('school-signup').addEventListener('submit', async e => {
       e.preventDefault();
       const school = {
         name: document.getElementById('school-name').value.trim(),
@@ -344,6 +385,21 @@
         email: document.getElementById('school-email').value.trim(),
         password: document.getElementById('school-pass').value
       };
+      try {
+        const firebaseUser = await registerSchoolFirebase(school);
+        if (firebaseUser) {
+          upsertSchoolProfile({ ...school, uid: firebaseUser.uid });
+          alert('✔️ School registered successfully! You can now login.');
+          window.location.reload();
+          return;
+        }
+      } catch (err) {
+        if (err && err.code === 'auth/email-already-in-use') {
+          alert('⚠️ That school email is already registered. Please login.');
+          return;
+        }
+        console.warn('Firebase school signup failed, trying local signup.', err);
+      }
       if (registerSchool(school)) {
         alert('✔️ School registered successfully! You can now login.');
         window.location.reload();

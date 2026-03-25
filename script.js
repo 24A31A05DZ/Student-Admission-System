@@ -15,6 +15,132 @@ document.querySelectorAll('.navbar a').forEach(anchor => {
 function handleStudentLogin(email, password) { return loginStudent(email, password); }
 function handleSchoolLogin(udise, password) { return loginSchool(udise, password); }
 
+// ---------- Firebase auth ----------
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCj83HXKPSSzbBzQaG7jZAYBv4VzxEl8rI",
+  authDomain: "student-admission-system-b64a7.firebaseapp.com",
+  projectId: "student-admission-system-b64a7",
+  storageBucket: "student-admission-system-b64a7.firebasestorage.app",
+  messagingSenderId: "324694363467",
+  appId: "1:324694363467:web:0f52ef5119f2bb2f66ecce",
+  measurementId: "G-HJK4PGDGY1"
+};
+
+let firebaseAuthInitPromise = null;
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${src}"]`);
+    if (existing) {
+      if (existing.dataset.loaded === "true") {
+        resolve();
+      } else {
+        existing.addEventListener("load", () => resolve(), { once: true });
+        existing.addEventListener("error", reject, { once: true });
+      }
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.addEventListener("load", () => {
+      script.dataset.loaded = "true";
+      resolve();
+    });
+    script.addEventListener("error", reject);
+    document.head.appendChild(script);
+  });
+}
+
+function initFirebaseAuth() {
+  if (firebaseAuthInitPromise) return firebaseAuthInitPromise;
+  firebaseAuthInitPromise = (async () => {
+    try {
+      await loadScript("https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js");
+      await loadScript("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js");
+      if (!window.firebase) return null;
+      if (!firebase.apps.length) {
+        firebase.initializeApp(FIREBASE_CONFIG);
+      }
+      return firebase.auth();
+    } catch (err) {
+      console.warn("Firebase Auth initialization failed:", err);
+      return null;
+    }
+  })();
+  return firebaseAuthInitPromise;
+}
+
+function upsertStudentProfile(student) {
+  const list = getStudents();
+  const idx = list.findIndex(s => s.email === student.email || (student.uid && s.uid === student.uid));
+  if (idx === -1) {
+    list.push(student);
+  } else {
+    list[idx] = { ...list[idx], ...student };
+  }
+  saveStudents(list);
+}
+
+function upsertSchoolProfile(school) {
+  const list = getSchools();
+  const idx = list.findIndex(s =>
+    s.udise === school.udise ||
+    s.email === school.email ||
+    (school.uid && s.uid === school.uid)
+  );
+  if (idx === -1) {
+    list.push(school);
+  } else {
+    list[idx] = { ...list[idx], ...school };
+  }
+  saveSchools(list);
+}
+
+async function loginStudentFirebase(email, password) {
+  const auth = await initFirebaseAuth();
+  if (!auth) return null;
+  const cred = await auth.signInWithEmailAndPassword(email, password);
+  return cred.user;
+}
+
+async function registerStudentFirebase(student) {
+  const auth = await initFirebaseAuth();
+  if (!auth) return null;
+  const cred = await auth.createUserWithEmailAndPassword(student.email, student.password);
+  if (student.name) {
+    await cred.user.updateProfile({ displayName: student.name });
+  }
+  return cred.user;
+}
+
+async function loginSchoolFirebase(identifier, password) {
+  const auth = await initFirebaseAuth();
+  if (!auth) return null;
+  let email = identifier;
+  if (!identifier.includes('@')) {
+    const school = getSchools().find(s => s.udise === identifier);
+    if (!school || !school.email) return null;
+    email = school.email;
+  }
+  const cred = await auth.signInWithEmailAndPassword(email, password);
+  return cred.user;
+}
+
+async function registerSchoolFirebase(school) {
+  const auth = await initFirebaseAuth();
+  if (!auth) return null;
+  const cred = await auth.createUserWithEmailAndPassword(school.email, school.password);
+  return cred.user;
+}
+
+async function signOutFirebaseIfReady() {
+  const auth = await initFirebaseAuth();
+  if (auth && auth.currentUser) {
+    await auth.signOut();
+  }
+}
+
 // ---------- localStorage helpers ----------
 function getStored(key, fallback = []) {
   try {
@@ -79,6 +205,75 @@ function updateApplicationStatus(id, updates) {
     return true;
   }
   return false;
+}
+
+function getApplicationStatus(app) {
+  return app.application_status || 'applied';
+}
+
+function setApplicationStatus(id, status, extraUpdates = {}) {
+  return updateApplicationStatus(id, { application_status: status, ...extraUpdates });
+}
+
+function addNotification(targetRole, targetId, message) {
+  const notes = getStored('notifications', []);
+  notes.push({
+    id: Date.now(),
+    targetRole,
+    targetId,
+    message,
+    createdAt: new Date().toISOString(),
+    read: false
+  });
+  setStored('notifications', notes);
+}
+
+window.update_profile = function(student_id, profile_data) {
+  const students = getStudents();
+  const idx = students.findIndex(s => s.uid === student_id || s.email === student_id || s.mobile === student_id);
+  if (idx === -1) return false;
+  students[idx] = { ...students[idx], ...profile_data };
+  saveStudents(students);
+  return true;
+};
+
+// minimal backend-like endpoints
+window.approve_student = function(student_id) {
+  const app = getApplications().find(a => String(a.id) === String(student_id));
+  if (!app) return false;
+  const ok = setApplicationStatus(student_id, 'approved', { letter: 'Pending' });
+  if (ok) {
+    addNotification('student', app.studentId, `Your application to ${app.schoolName} was approved. Please submit confirmation form.`);
+  }
+  return ok;
+};
+
+window.submit_confirmation = function(student_id, form_data = {}) {
+  const app = getApplications().find(a => String(a.id) === String(student_id));
+  if (!app) return false;
+  const ok = setApplicationStatus(student_id, 'form_submitted', {
+    letter: 'Completed',
+    confirmationData: form_data,
+    offlineVisitRequired: true
+  });
+  if (ok) {
+    addNotification('school', app.schoolId || app.schoolUdise, `${app.studentName} submitted confirmation. Visit Offline Required.`);
+  }
+  return ok;
+};
+
+async function getAuthUserOrRedirect() {
+  const auth = await initFirebaseAuth();
+  if (!auth) return null;
+  return new Promise(resolve => {
+    const stop = auth.onAuthStateChanged(user => {
+      stop();
+      if (!user && location.pathname.includes('/pages/')) {
+        window.location.href = 'login.html';
+      }
+      resolve(user || null);
+    });
+  });
 }
 
 // ---------- homepage schools ----------
@@ -335,41 +530,52 @@ function loadSchoolDetails() {
 
 // ---------- student dashboard ----------
 function loadStudentDashboard() {
-  const email = getCurrentStudent();
-  if (!email) { window.location.href = 'login.html'; return; }
-  const student = getStudents().find(s=>s.email===email || s.mobile===email);
-  if (student) document.getElementById('student-name').textContent = student.name;
-  const apps = getApplications().filter(a => a.studentEmail === email);
-  // fill stats
-  document.getElementById('total-applied').textContent = apps.length;
-  document.getElementById('under-review').textContent = apps.filter(a=>a.status==='Under Review').length;
-  document.getElementById('admitted').textContent = apps.filter(a=>a.status==='Admitted').length;
-  document.getElementById('enrolled').textContent = apps.filter(a=>a.status==='Enrolled').length;
-  
-  // populate table
-  const tbody = document.querySelector('#student-apps-table tbody');
-  tbody.innerHTML = '';
-  apps.forEach(app => {
-    let statusBadge = `<span class="badge badge-secondary px-3 py-2">${app.status}</span>`;
-    if (app.status === 'Admitted') statusBadge = `<span class="badge badge-success px-3 py-2">Admitted</span>`;
-    else if (app.status === 'Under Review') statusBadge = `<span class="badge badge-warning px-3 py-2">Under Review</span>`;
-    else if (app.status === 'Enrolled') statusBadge = `<span class="badge badge-info px-3 py-2">Enrolled</span>`;
+  getAuthUserOrRedirect().then(user => {
+    if (!user) return;
+    const student = getStudents().find(s => s.uid === user.uid || s.email === user.email);
+    if (student) document.getElementById('student-name').textContent = student.name || user.email;
+    const apps = getApplications().filter(a => a.studentId === user.uid);
+    // fill stats
+    document.getElementById('total-applied').textContent = apps.length;
+    document.getElementById('under-review').textContent = apps.filter(a => getApplicationStatus(a) === 'applied').length;
+    document.getElementById('admitted').textContent = apps.filter(a => getApplicationStatus(a) === 'approved').length;
+    document.getElementById('enrolled').textContent = apps.filter(a => getApplicationStatus(a) === 'form_submitted' || getApplicationStatus(a) === 'visited').length;
+    
+    // populate table
+    const tbody = document.querySelector('#student-apps-table tbody');
+    tbody.innerHTML = '';
+    if (apps.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No applications found.</td></tr>';
+      return;
+    }
+    apps.forEach(app => {
+      const appStatus = getApplicationStatus(app);
+      let statusBadge = `<span class="badge badge-warning px-3 py-2" title="Application sent to school">Applied</span>`;
+      if (appStatus === 'approved') statusBadge = `<span class="badge badge-success px-3 py-2" title="School approved your application">Approved</span>`;
+      else if (appStatus === 'form_submitted') statusBadge = `<span class="badge badge-info px-3 py-2" title="Waiting for offline visit">Form Submitted</span>`;
+      else if (appStatus === 'visited') statusBadge = `<span class="badge badge-primary px-3 py-2" title="Offline formalities completed">Visited</span>`;
 
-    let letterStatus = app.letter === 'Pending' ?
-      `<button class="btn btn-sm btn-primary" onclick="openJoiningModal(${app.id})">Fill Now</button>` :
-      app.letter;
+      let letterStatus = '<span class="text-muted">Waiting for approval</span>';
+      if (appStatus === 'approved') {
+        letterStatus = `<button class="btn btn-sm btn-primary" onclick="openJoiningModal(${app.id})">Open Confirmation Letter/Form</button>`;
+      } else if (appStatus === 'form_submitted') {
+        letterStatus = '<span class="badge badge-info">Form Submitted</span>';
+      } else if (appStatus === 'visited') {
+        letterStatus = '<span class="badge badge-success">Completed</span>';
+      }
 
-    const row = `
-      <tr>
-        <td>${app.schoolName}</td>
-        <td>${app.class}</td>
-        <td>${app.date}</td>
-        <td>${statusBadge}</td>
-        <td>${app.testScore||'-'}</td>
-        <td>${letterStatus}</td>
-        <td><button class="btn btn-sm btn-outline-primary" onclick="viewAppDetails(${app.id})">View Details</button></td>
-      </tr>`;
-    tbody.innerHTML += row;
+      const row = `
+        <tr>
+          <td>${app.schoolName || '-'}</td>
+          <td>${app.class || '-'}</td>
+          <td>${app.date || '-'}</td>
+          <td>${statusBadge}</td>
+          <td>${app.testScore||'-'}</td>
+          <td>${letterStatus}</td>
+          <td><button class="btn btn-sm btn-outline-primary" onclick="viewAppDetails(${app.id})">View Details</button></td>
+        </tr>`;
+      tbody.innerHTML += row;
+    });
   });
 }
 
@@ -389,76 +595,112 @@ window.viewAppDetails = function(id) {
 
 window.submitJoiningForm = function() {
   if (!window.currentApplicationId) return;
-  updateApplicationStatus(window.currentApplicationId, {letter:'Completed', status:'Enrolled'});
-  alert('✅ Confirmation Letter Submitted Successfully!\nYour status is now "Enrolled"');
+  const ok = window.submit_confirmation(window.currentApplicationId, { submittedAt: new Date().toISOString() });
+  if (!ok) {
+    alert('Could not submit confirmation form.');
+    return;
+  }
+  alert('✅ Confirmation form submitted.\nSchool is notified: Visit Offline Required.');
   $('#confirmationModal').modal('hide');
   window.currentApplicationId = null;
   loadStudentDashboard();
 };
 
-window.logout = function() {
-  if (confirm('Logout?')) { logout(); }
-};
-
 // ---------- admin dashboard ----------
 function loadAdminDashboard() {
-  const udise = getCurrentSchool();
-  if (!udise) { window.location.href = 'login.html'; return; }
-  const school = getSchools().find(s => s.udise === udise);
-  if (school) {
-    document.querySelector('span.font-weight-bold').textContent = `${school.name} Dashboard`;
-  }
-  let apps = getApplications().filter(a => a.schoolId === school?.id);
+  getAuthUserOrRedirect().then(user => {
+    if (!user) return;
+    const school = getSchools().find(s => s.uid === user.uid || s.email === user.email);
+    const title = document.querySelector('.container-fluid.py-4 h2');
+    if (school && title) title.textContent = `School Dashboard - ${school.name}`;
+    const admissionLink = document.getElementById('admissionNavLink');
+    if (admissionLink) {
+      admissionLink.href = `admission.html?schoolId=${encodeURIComponent(user.uid)}`;
+    }
+    let apps = getApplications().filter(a =>
+      a.schoolId === user.uid || (school?.udise && a.schoolUdise === school.udise)
+    );
 
-  // update stats cards dynamically
-  const total = apps.length;
-  const admitted = apps.filter(a=>a.status==='Admitted').length;
-  const rejected = apps.filter(a=>a.status==='Rejected').length;
-  const pending = total - admitted - rejected;
-  if (document.getElementById('total-apps')) document.getElementById('total-apps').textContent = total;
-  if (document.getElementById('pending-apps')) document.getElementById('pending-apps').textContent = pending;
-  if (document.getElementById('admitted-apps')) document.getElementById('admitted-apps').textContent = admitted;
-  if (document.getElementById('rejected-apps')) document.getElementById('rejected-apps').textContent = rejected;
+    // update stats cards dynamically
+    const total = apps.length;
+    const admitted = apps.filter(a => getApplicationStatus(a) === 'approved').length;
+    const rejected = apps.filter(a => getApplicationStatus(a) === 'visited').length;
+    const pending = apps.filter(a => getApplicationStatus(a) === 'applied').length;
+    if (document.getElementById('total-apps')) document.getElementById('total-apps').textContent = total;
+    if (document.getElementById('pending-apps')) document.getElementById('pending-apps').textContent = pending;
+    if (document.getElementById('admitted-apps')) document.getElementById('admitted-apps').textContent = admitted;
+    if (document.getElementById('rejected-apps')) document.getElementById('rejected-apps').textContent = rejected;
 
-  document.getElementById('searchInput').addEventListener('keyup', function() {
-    const term = this.value.toLowerCase();
-    renderSchoolTable(apps.filter(a => getStudents().find(u=>u.email===a.studentEmail)?.name.toLowerCase().includes(term)));
+    const search = document.getElementById('searchInput');
+    if (search) {
+      search.addEventListener('keyup', function() {
+        const term = this.value.toLowerCase();
+        renderSchoolTable(apps.filter(a => (a.studentName || '').toLowerCase().includes(term)));
+      });
+    }
+    renderSchoolTable(apps);
   });
-  renderSchoolTable(apps);
 }
 
 function renderSchoolTable(list) {
   const tbody = document.querySelector('#school-table tbody');
   tbody.innerHTML = '';
+  if (!list || list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No applications found.</td></tr>';
+    return;
+  }
   list.forEach(a => {
-    const student = getStudents().find(u => u.email === a.studentEmail) || {};
+    const appStatus = getApplicationStatus(a);
+    let approveBtn = `<button class="btn btn-sm btn-success mr-2" onclick="approveStudent(${a.id})">Approve</button>`;
+    if (appStatus === 'approved' || appStatus === 'form_submitted' || appStatus === 'visited') {
+      approveBtn = '<span class="badge badge-success">Approved</span>';
+    }
+    const markVisitedBtn = appStatus === 'form_submitted'
+      ? `<button class="btn btn-sm btn-dark mr-2" onclick="markVisited(${a.id})">Mark Visited</button>`
+      : '';
     const actions = `
-      <button class="btn btn-sm btn-success mr-2" onclick="sendConfirmation(${a.id})">Send Confirmation</button>
-      <button class="btn btn-sm btn-primary mr-2" onclick="changeStatus(${a.id})">Update Status</button>
+      ${approveBtn}
+      ${markVisitedBtn}
       <button class="btn btn-sm btn-info" onclick="viewDetails(${a.id})">View</button>
     `;
-    let statusClass = 'badge-secondary';
-    if (a.status==='Admitted') statusClass='badge-success';
-    else if (a.status==='Under Review') statusClass='badge-warning';
-    else if (a.status==='Rejected') statusClass='badge-danger';
-    else if (a.status==='Enrolled') statusClass='badge-info';
+    let statusClass = 'badge-warning';
+    let statusText = 'Applied';
+    if (appStatus === 'approved') { statusClass = 'badge-success'; statusText = 'Approved'; }
+    else if (appStatus === 'form_submitted') { statusClass = 'badge-info'; statusText = 'Form Submitted'; }
+    else if (appStatus === 'visited') { statusClass = 'badge-primary'; statusText = 'Visited'; }
+    const offlineLabel = appStatus === 'form_submitted'
+      ? '<span class="badge badge-danger" title="Student must visit school">Visit Offline Required</span>'
+      : '-';
     const row = `
       <tr>
-        <td>${student.name || 'N/A'}</td>
+        <td>${a.studentName || 'N/A'}</td>
         <td>${a.class}</td>
         <td>${a.date}</td>
         <td>${a.testScore||'-'}</td>
-        <td><span class="badge ${statusClass}">${a.status}</span></td>
-        <td>${a.letter}</td>
+        <td><span class="badge ${statusClass}" title="Current application status">${statusText}</span></td>
+        <td>${offlineLabel}</td>
         <td>${actions}</td>
       </tr>`;
     tbody.innerHTML += row;
   });
 }
 
-window.sendConfirmation = function(id) {
-  updateApplicationStatus(id, {letter:'Sent - Pending Fill'});
-  alert('✅ Confirmation Letter sent');
+window.approveStudent = function(id) {
+  const ok = window.approve_student(id);
+  if (!ok) {
+    alert('Could not approve application.');
+    return;
+  }
+  alert('✅ Student approved. Student can now open confirmation form.');
+  loadAdminDashboard();
+};
+window.markVisited = function(id) {
+  const ok = setApplicationStatus(id, 'visited', { offlineVisitRequired: false });
+  if (!ok) {
+    alert('Could not update visit status.');
+    return;
+  }
+  alert('✅ Student marked as visited.');
   loadAdminDashboard();
 };
 window.viewDetails = function(id) {
@@ -466,20 +708,16 @@ window.viewDetails = function(id) {
 };
 
 window.changeStatus = function(id) {
-  const options = ['Submitted','Entrance Test Pending','Test Completed','Under Review','Admitted','Rejected','Enrolled'];
-  const newStatus = prompt('Enter new status for application (one of: ' + options.join(', ') + ')');
+  const options = ['applied', 'approved', 'form_submitted', 'visited'];
+  const newStatus = prompt('Enter new application status (one of: ' + options.join(', ') + ')');
   if (newStatus && options.includes(newStatus)) {
-    updateApplicationStatus(id, {status:newStatus});
+    setApplicationStatus(id, newStatus);
     alert('Status updated to ' + newStatus);
     loadAdminDashboard();
   } else if (newStatus) {
     alert('Invalid status entered');
   }
 };
-window.logoutSchool = function() {
-  if(confirm('Logout from School Dashboard?')){ logoutSchool(); }
-};
-
 // create sample schools if none exist
 (function ensureSampleSchools(){
   let sch = getSchools();
@@ -530,6 +768,41 @@ if (document.body.classList.contains('student-dashboard-page')) {
 }
 if (document.body.classList.contains('school-dashboard-page')) {
   document.addEventListener('DOMContentLoaded', loadAdminDashboard);
+}
+
+function loadProfilePage() {
+  if (!document.body.classList.contains('profile-page')) return;
+  getAuthUserOrRedirect().then(user => {
+    if (!user) return;
+    const student = getStudents().find(s => s.uid === user.uid || s.email === user.email) || {};
+    const nameEl = document.getElementById('profileName');
+    const emailEl = document.getElementById('profileEmail');
+    const phoneEl = document.getElementById('profilePhone');
+    const photoEl = document.getElementById('profilePhoto');
+    const form = document.getElementById('profileForm');
+    const msg = document.getElementById('profileMsg');
+    if (nameEl) nameEl.value = student.name || '';
+    if (emailEl) emailEl.value = user.email || student.email || '';
+    if (phoneEl) phoneEl.value = student.mobile || '';
+    if (photoEl) photoEl.src = student.photo || 'https://via.placeholder.com/140x140.png?text=Profile';
+    if (form) {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const ok = window.update_profile(user.uid, {
+          uid: user.uid,
+          name: nameEl.value.trim(),
+          mobile: phoneEl.value.trim()
+        });
+        if (msg) {
+          msg.className = ok ? 'alert alert-success mt-3' : 'alert alert-danger mt-3';
+          msg.textContent = ok ? 'Profile updated successfully.' : 'Profile update failed.';
+        }
+      });
+    }
+  });
+}
+if (document.body.classList.contains('profile-page')) {
+  document.addEventListener('DOMContentLoaded', loadProfilePage);
 }
 
 // --------- Authentication modal & navbar helpers ---------
@@ -659,13 +932,31 @@ function initAuthForms(root) {
   // student login
   const sLogin = root.querySelector('#modal-student-login');
   if (sLogin) {
-    sLogin.addEventListener('submit', e => {
+    sLogin.addEventListener('submit', async e => {
       e.preventDefault();
       const email = root.querySelector('#modal-student-email').value.trim();
       const pwd = root.querySelector('#modal-student-password').value;
-      const user = loginStudent(email, pwd);
+      let user = null;
+      try {
+        if (email.includes('@')) {
+          user = await loginStudentFirebase(email, pwd);
+        }
+      } catch (err) {
+        console.warn('Firebase student login failed, trying local login.', err);
+      }
+      if (!user) {
+        user = loginStudent(email, pwd);
+      } else {
+        upsertStudentProfile({
+          uid: user.uid,
+          name: user.displayName || email.split('@')[0],
+          email: user.email,
+          mobile: '',
+          password: ''
+        });
+      }
       if (user) {
-        setCurrentStudent(email);
+        setCurrentStudent(user.email || email);
         localStorage.removeItem('currentSchool');
         localStorage.setItem('role','student');
         $('#loginModal').modal('hide');
@@ -678,7 +969,7 @@ function initAuthForms(root) {
   // student signup
   const sSign = root.querySelector('#modal-student-signup');
   if (sSign) {
-    sSign.addEventListener('submit', e => {
+    sSign.addEventListener('submit', async e => {
       e.preventDefault();
       const student = {
         name: root.querySelector('#modal-s-name').value.trim(),
@@ -686,6 +977,21 @@ function initAuthForms(root) {
         mobile: root.querySelector('#modal-s-mobile').value.trim(),
         password: root.querySelector('#modal-s-password').value
       };
+      try {
+        const firebaseUser = await registerStudentFirebase(student);
+        if (firebaseUser) {
+          upsertStudentProfile({ ...student, uid: firebaseUser.uid });
+          alert('Student account created! Please login.');
+          stoggle.click();
+          return;
+        }
+      } catch (err) {
+        if (err && err.code === 'auth/email-already-in-use') {
+          alert('That email is already registered. Please login.');
+          return;
+        }
+        console.warn('Firebase student signup failed, trying local signup.', err);
+      }
       if (registerStudent(student)) {
         alert('Student account created! Please login.');
         stoggle.click();
@@ -697,13 +1003,25 @@ function initAuthForms(root) {
   // school login
   const schLogin = root.querySelector('#modal-school-login');
   if (schLogin) {
-    schLogin.addEventListener('submit', e => {
+    schLogin.addEventListener('submit', async e => {
       e.preventDefault();
       const udise = root.querySelector('#modal-school-udise').value.trim();
       const pwd = root.querySelector('#modal-school-password').value;
-      const sch = loginSchool(udise, pwd);
+      let sch = null;
+      try {
+        const firebaseUser = await loginSchoolFirebase(udise, pwd);
+        if (firebaseUser) {
+          sch = getSchools().find(s => s.uid === firebaseUser.uid || s.email === firebaseUser.email) || null;
+          if (sch && sch.udise) setCurrentSchool(sch.udise);
+        }
+      } catch (err) {
+        console.warn('Firebase school login failed, trying local login.', err);
+      }
+      if (!sch) {
+        sch = loginSchool(udise, pwd);
+      }
       if (sch) {
-        setCurrentSchool(udise);
+        setCurrentSchool(sch.udise || udise);
         localStorage.removeItem('currentStudent');
         localStorage.setItem('role','school');
         $('#loginModal').modal('hide');
@@ -716,7 +1034,7 @@ function initAuthForms(root) {
   // school signup
   const schSign = root.querySelector('#modal-school-signup');
   if (schSign) {
-    schSign.addEventListener('submit', e => {
+    schSign.addEventListener('submit', async e => {
       e.preventDefault();
       const school = {
         name: root.querySelector('#modal-school-name').value.trim(),
@@ -724,6 +1042,21 @@ function initAuthForms(root) {
         email: root.querySelector('#modal-school-email').value.trim(),
         password: root.querySelector('#modal-school-pass').value
       };
+      try {
+        const firebaseUser = await registerSchoolFirebase(school);
+        if (firebaseUser) {
+          upsertSchoolProfile({ ...school, uid: firebaseUser.uid });
+          alert('School registered successfully! You can now login.');
+          window.location.reload();
+          return;
+        }
+      } catch (err) {
+        if (err && err.code === 'auth/email-already-in-use') {
+          alert('That school email is already registered. Please login.');
+          return;
+        }
+        console.warn('Firebase school signup failed, trying local signup.', err);
+      }
       if (registerSchool(school)) {
         alert('School registered successfully! You can now login.');
         window.location.reload();
@@ -738,16 +1071,31 @@ function initAuthForms(root) {
 function updateNavForRole() {
   const loginBtn = document.getElementById('loginBtn');
   const dashLink = document.getElementById('dashboardLink');
+  const admissionLink = document.querySelector('a.nav-link[href$="admission.html"], a.nav-link[href$="pages/admission.html"]');
+  const profileLink = document.getElementById('profileLink');
+  const logoutNavLink = document.getElementById('logoutNavLink');
   // helper to choose correct relative prefix depending on current file location
   const prefix = location.pathname.includes('/pages/') ? '' : 'pages/';
   if (getCurrentStudent()) {
     if (dashLink) dashLink.href = prefix + 'student-dashbord.html';
+    if (admissionLink) admissionLink.href = prefix + 'admission.html';
+    if (profileLink) profileLink.href = prefix + 'profile.html';
+    if (logoutNavLink) {
+      logoutNavLink.style.display = '';
+      logoutNavLink.onclick = (e) => { e.preventDefault(); logout(); };
+    }
     if (loginBtn) {
       loginBtn.textContent = 'Logout';
       loginBtn.onclick = () => { logout(); };
     }
   } else if (getCurrentSchool()) {
     if (dashLink) dashLink.href = prefix + 'school-dashboard.html';
+    if (admissionLink) admissionLink.href = prefix + 'admission.html';
+    if (profileLink) profileLink.href = prefix + 'profile.html';
+    if (logoutNavLink) {
+      logoutNavLink.style.display = '';
+      logoutNavLink.onclick = (e) => { e.preventDefault(); logoutSchool(); };
+    }
     if (loginBtn) {
       loginBtn.textContent = 'Logout';
       loginBtn.onclick = () => { logoutSchool(); };
@@ -767,25 +1115,41 @@ function updateNavForRole() {
         loginBtn.onclick = () => { $('#loginModal').modal('show'); };
       }
     }
+    if (logoutNavLink) logoutNavLink.style.display = 'none';
+    if (profileLink) profileLink.href = '#';
   }
   // re-highlight after modifications
   highlightActiveNav();
 }
 
+function getLoginPagePath() {
+  return location.pathname.includes('/pages/') ? 'login.html' : 'pages/login.html';
+}
+
 // logout helpers
-function logout() {
+function logout(askConfirmation = true) {
+  if (askConfirmation && !confirm('Logout?')) return;
   // clear any stored login data
   localStorage.removeItem('currentStudent');
   localStorage.removeItem('role');
-  updateNavForRole();
-  // send user to login page explicitly
-  window.location.href = 'login.html';
+  signOutFirebaseIfReady()
+    .catch(() => {})
+    .finally(() => {
+      updateNavForRole();
+      // send user to login page explicitly
+      window.location.href = getLoginPagePath();
+    });
 }
-function logoutSchool() {
+function logoutSchool(askConfirmation = true) {
+  if (askConfirmation && !confirm('Logout from School Dashboard?')) return;
   localStorage.removeItem('currentSchool');
   localStorage.removeItem('role');
-  updateNavForRole();
-  window.location.href = 'login.html';
+  signOutFirebaseIfReady()
+    .catch(() => {})
+    .finally(() => {
+      updateNavForRole();
+      window.location.href = getLoginPagePath();
+    });
 }
 
 // initialize modal and navbar when DOM ready
@@ -814,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem('currentStudent');
       localStorage.removeItem('currentSchool');
       localStorage.removeItem('role');
-      window.location.href = 'login.html';
+      window.location.href = getLoginPagePath();
     }
   });
 });
