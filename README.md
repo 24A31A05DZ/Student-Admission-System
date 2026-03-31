@@ -86,6 +86,4 @@ Sample credentials (if enabled in your UI/data):
 - **Role**: Frontend  
 - **LinkedIn URL**: `https://www.linkedin.com/in/chandini-gurram-790b95317/`
 
----
-This project is for demonstration/educational use. Avoid storing sensitive data in `localStorage` for production systems.
 
