@@ -1,7 +1,7 @@
 # 1. Project Title
 **Student Admission System**
 
-# 2. Project Description (in 2 - 3 lines)
+# 2. Project Description 
 A responsive front-end student admission portal built using **HTML, CSS, and JavaScript**.  
 It supports **Student** and **School (Admin)** roles with dashboards, and stores all data in the browser using **localStorage** (no backend).
 
@@ -45,7 +45,7 @@ Student-Admission-System/
 
 # 7. Installation/Setup of the project
 1. Download or clone the repository:
-   - `git clone <repo-url>`
+   - `git clone https://github.com/24A31A05DZ/Student-Admission-System.git`
 2. Open the project folder.
 3. Run it using either method:
    - **Quick run**: Double-click `index.html`
